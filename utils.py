@@ -1,7 +1,7 @@
-def order_t_edges(tedges):
-    return tedges.sort(key=lambda t: t[2])
+def streamf_to_tedges(fpath: str)-> tuple[list[tuple[int, int, int]], int]:
+    pass
 
-def patg_to_tedges(fpath: string) -> tuple[list[tuple[int, int, int]], int]
+def patg_to_tedges(fpath: str) -> tuple[list[tuple[int, int, int]], int]:
     with open(fpath, 'r') as patg_file:
         n = int(patg_file.readline(0))
         lines = patg_file[1:].readlines()
