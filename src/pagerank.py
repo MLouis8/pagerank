@@ -44,9 +44,11 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_matrix=None, iter=50, eps=1e
             return r
     return r
 
+
+
 def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize, t_end=math.inf, alpha=0.85, beta=0.001):
     """
-    Temporal PageRank with timestamped, the random walk point of vue.
+    Temporal PageRank on timestamped edges.
 
     @parameters:
         n:           number of nodes in the graph
@@ -80,6 +82,17 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
             s[u] = 0
     return r
 
-def temp_pr_strgraph_rdwalk():
-    """Temporal PageRank on stream graphs, random walk point of vue."""
+def temp_pr_linkstr():
+    """
+    Temporal PageRank on link streams. The algorithm is based on the timestamped edges version, but runs in reverse.
+    This way it ensures that paths exist even with deletions.
+    """
+    t_edges.sort(key=lambda t: -t[2])
+
+
+def temp_pr_linkstr_v2():
+    """
+    Temporal PageRank like measure on link streams. It is based on temporal pagerank on timestamped edges.
+    But takes into account link duration.
+    """
     pass
