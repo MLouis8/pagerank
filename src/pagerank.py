@@ -2,24 +2,24 @@ import numpy as np
 import networkx as nx
 import math
 
-def create_transition_dangling_matrices(graph: nx.Graph):
+def create_transition_and_dangling_matrices(graph: nx.DiGraph):
     """
     Computes the transition probability matrix and the dangling node vector
     from a directed weighted (on the edges) graph from networkx.
     """
     n = graph.number_of_nodes()
-    h = np.zeros(n, n)
+    h = np.zeros((n, n))
     a = np.zeros(n)
-    edge_weights = nx.get_edge_attributes(graph, "weight")
+    edge_weights = nx.get_edge_attributes(graph, "weight", default=1)
     for u in graph:
-        if len(graph.neighbors(u)) == 0:
+        if list(graph.successors(u)) == []:
             a[u] = 1
-        total_weight = sum([edge_weights[(u, v)] for v in graph.neighbors(u)])
-        for v in graph.neighbors(u): # returns only successors on a digraph
-            h[u, v] = edge_weights[(u, v)] / total_weight
+        total_weight = sum([edge_weights[(u, v)] for v in graph.successors(u)])
+        for v in graph.successors(u):
+            h[u-1, v-1] = edge_weights[(u, v)] / total_weight
     return h, a
 
-def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_matrix=None, iter=50, eps=1e**(-5)):
+def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e-5):
     """
     Static PageRank implemented with the original power method.
     
@@ -27,7 +27,7 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_matrix=None, iter=50, eps=1e
         h_matrix: hyperlink matrix (Markov matrix from original graph)
         a_vector: dangling node vector
         alpha:    probability of using h_matrix  / convergence ratio
-        p_matrix: personalization matrix, if none then n-squared 1/n matrix is taken
+        p_vector: personalization vector, if none then 1/n vector is taken
         iter:     number of iterations of the power method
         eps:      minimal convergence gap
     
@@ -35,25 +35,26 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_matrix=None, iter=50, eps=1e
         r: pagerank vector
     """
     n = len(h_matrix)
-    if not p_matrix:
-        p_matrix = np.ones(n, n) * 1/n
-    r = p_matrix
+    if not p_vector:
+        p_vector = np.ones((1, n)) * 1/n
+    r = p_vector
     for _ in range(iter):
-        rr = alpha * r @ h_matrix + (alpha * r @ a_vector + 1 - alpha) @ p_matrix
+        rr = alpha * r @ h_matrix + (alpha * r @ a_vector + 1 - alpha) * p_vector
         if np.linalg.norm(r - rr) < eps:
-            return r
-    return r
+            return rr
+        r = rr
+    return rr
 
 
 
-def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize, t_end=math.inf, alpha=0.85, beta=0.001):
+def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize=False, t_end=math.inf, alpha=0.85, beta=0.999):
     """
     Temporal PageRank on timestamped edges.
 
     @parameters:
         n:           number of nodes in the graph
         t_edges:     list of timestamped edges, ordered by timestamp
-        personalize: if True then a personalize vector is computed from the temporal graph using the usual personalization matrix: nxn (1/n) matrix
+        personalize: if True then a personalization vector is computed from the temporal graph using the usual uniform distribution
         t_end:       last timestamp accepted in the walks (if None, every edge will be taken)
         alpha:       probability of folowwing the walk
         beta:        transition probability
