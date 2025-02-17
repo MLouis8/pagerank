@@ -35,7 +35,7 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e
         r: pagerank vector
     """
     n = len(h_matrix)
-    if not p_vector:
+    if not isinstance(p_vector, np.ndarray):
         p_vector = np.ones((1, n)) * 1/n
     r = p_vector
     for _ in range(iter):
@@ -47,14 +47,15 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e
 
 
 
-def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize=False, t_end=math.inf, alpha=0.85, beta=0.999):
+def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize=False, p_vector=None, t_end=math.inf, alpha=0.85, beta=1):
     """
     Temporal PageRank on timestamped edges.
 
     @parameters:
         n:           number of nodes in the graph
         t_edges:     list of timestamped edges, ordered by timestamp
-        personalize: if True then a personalization vector is computed from the temporal graph using the usual uniform distribution
+        personalize: if True then a normalization using p_vector is done
+        p_vector:    personalization vector, if None given then out-degree vector is used (personalize needs to be True)
         t_end:       last timestamp accepted in the walks (if None, every edge will be taken)
         alpha:       probability of folowwing the walk
         beta:        transition probability
@@ -68,7 +69,8 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
         h = np.zeros(n)
         for (u, _, _) in t_edges:
             h[u] += 1
-        h = n * h / len(t_edges)
+        if p_vector:
+            h = p_vector / (h / len(t_edges))
     for (u, v, t) in t_edges:
         if t > t_end:
             return r
@@ -83,17 +85,37 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
             s[u] = 0
     return r
 
-def temp_pr_linkstr():
+def temp_pr_linkstr_walk():
     """
     Temporal PageRank on link streams. The algorithm is based on the timestamped edges version, but runs in reverse.
     This way it ensures that paths exist even with deletions.
     """
-    t_edges.sort(key=lambda t: -t[2])
-
-
-def temp_pr_linkstr_v2():
-    """
-    Temporal PageRank like measure on link streams. It is based on temporal pagerank on timestamped edges.
-    But takes into account link duration.
-    """
     pass
+
+
+def temp_pr_linkstr_static(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e-5):
+    """
+    Temporal PageRank like measure on link streams. Transform a temporal network into a static one,
+    using link durations to weight each edge.
+    
+    @parameters:
+        h_matrix: hyperlink matrix (Markov matrix from original graph)
+        a_vector: dangling node vector
+        alpha:    probability of using h_matrix  / convergence ratio
+        p_vector: personalization vector, if none then 1/n vector is taken
+        iter:     number of iterations of the power method
+        eps:      minimal convergence gap
+    
+    @returns:
+        r: pagerank vector
+    """
+    n = len(h_matrix)
+    if not isinstance(p_vector, np.ndarray):
+        p_vector = np.ones((1, n)) * 1/n
+    r = p_vector
+    for _ in range(iter):
+        rr = alpha * r @ h_matrix + (alpha * r @ a_vector + 1 - alpha) * p_vector
+        if np.linalg.norm(r - rr) < eps:
+            return rr
+        r = rr
+    return rr
