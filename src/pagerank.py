@@ -53,10 +53,10 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
 
     @parameters:
         n:           number of nodes in the graph
-        t_edges:     list of timestamped edges, ordered by timestamp
+        t_edges:     list of timestamped edges
         personalize: if True then a normalization using p_vector is done
         p_vector:    personalization vector, if None given then out-degree vector is used (personalize needs to be True)
-        t_end:       last timestamp accepted in the walks (if None, every edge will be taken)
+        t_end:       time limit (if None, every edge will be taken)
         alpha:       probability of folowwing the walk
         beta:        transition probability
     
@@ -86,37 +86,63 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
             s[u] = 0
     return r
 
-def temp_pr_linkstr_walk():
+def temp_pr_linkstr_walk(n, t_edges, t_end, personalize=True, p_vector=None, alpha=0.85, beta=1):
     """
-    Temporal PageRank on link streams. The algorithm is based on the timestamped edges version, but runs in reverse.
-    This way it ensures that paths exist even with deletions.
-    """
-    pass
-
-
-def temp_pr_linkstr_static(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e-5):
-    """
-    Temporal PageRank like measure on link streams. Transform a temporal network into a static one,
-    using link durations to weight each edge.
+    Temporal PageRank on link streams. The algorithm is based on the timestamped edges version.
     
     @parameters:
-        h_matrix: hyperlink matrix (Markov matrix from original graph)
-        a_vector: dangling node vector
-        alpha:    probability of using h_matrix  / convergence ratio
-        p_vector: personalization vector, if none then 1/n vector is taken
-        iter:     number of iterations of the power method
-        eps:      minimal convergence gap
+        n:           number of nodes in the graph
+        t_edges:     list of temporal edges
+        t_end:       time limit
+        personalize: if True then a normalization using p_vector is done
+        p_vector:    personalization vector, if None given then out-degree vector is used (personalize needs to be True)
+        alpha:       probability of folowwing the walk
+        beta:        transition probability
     
     @returns:
         r: pagerank vector
     """
-    n = len(h_matrix)
-    if not isinstance(p_vector, np.ndarray):
-        p_vector = np.ones((1, n)) * 1/n
-    r = p_vector
-    for _ in range(iter):
-        rr = alpha * r @ h_matrix + (alpha * r @ a_vector + 1 - alpha) * p_vector
-        if np.linalg.norm(r - rr) < eps:
-            return rr
-        r = rr
-    return rr
+    t_edges.sort(key=lambda t: t[2])
+    valid_t_edges = filter(lambda e: e[3] >= t_end)
+    r, s = np.zeros(n), np.zeros(n)
+    if personalize:
+        h = np.zeros(n)
+        for (u, _, _) in t_edges:
+            h[u] += 1
+        h = h / len(t_edges)
+        if isinstance(p_vector, np.ndarray):
+            h = p_vector / (h / len(t_edges))
+    for (u, v, _, _) in valid_t_edges:
+        r[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+        s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+        r[v] += s[u] * alpha
+        if beta < 1:
+            s[v] += s[u] * (1 - beta) * alpha
+            s[u] *= beta
+        else:
+            s[v] += s[u] * alpha
+            s[u] = 0
+    return r
+
+def temp_pr_linkstr(t_edges, t_end=math.inf, alpha=0.85, p_vector=None, iter=50, eps=1e-5):
+    """
+    Temporal PageRank like measure. It works like the original pagerank but adds temporal informations.
+    
+    @parameters:
+        t_edges:     list of temporal edges
+        t_end:       time limit (if None, every edge is used)
+        alpha:       probability of using h_matrix  / convergence ratio
+        p_vector:    personalization vector, if none then 1/n vector is taken
+        iter:        number of iterations of the power method
+        eps:         minimal convergence gap
+    
+    @returns:
+        r: pagerank vector
+    """
+    valid_t_edges = filter(t_edges, lambda e: e[3] >= t_end)
+    time_length = min(max(valid_t_edges, key=lambda x: x[1]), t_end) - min(valid_t_edges, key=lambda x: x[0])
+    digraph_edges = [(e[0], e[1], {"weight": (e[1]-e[0])/time_length}) for e in valid_t_edges]
+    G = nx.DiGraph()
+    G.add_edges_from(digraph_edges)
+    h, a = create_transition_and_dangling_matrices(G)
+    return static_pr_pwr(h, a, alpha, p_vector, iter, eps)

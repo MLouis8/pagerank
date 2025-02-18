@@ -26,12 +26,10 @@ Knowing that:
 
 **Complexity:** The implementation is linear in the number of edges with one or two pass (whether a personalization vector is used or not). It takes temporal edges one by one, allowing the user to have the pagerank vector a each time step.
 
-### Temporal Pagerank on link streams [```temp_pr_linkstr_static```](./src/pagerank.py)
-In this version we apply standard pagerank algorithm on a link stream, weighting the edges in the graph according to their duration:
+### Temporal Pagerank on link streams [```temp_pr_linkstr_walk```](./src/pagerank.py)
 
-We also re-use the transition probability introduced in the temporal pagerank algorithm.
 
-**Complexity**
+**Complexity** Same as temporal Pagerank.
 
 ## Programing Language
 
