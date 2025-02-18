@@ -26,14 +26,7 @@ Knowing that:
 
 **Complexity:** The implementation is linear in the number of edges with one or two pass (whether a personalization vector is used or not). It takes temporal edges one by one, allowing the user to have the pagerank vector a each time step.
 
-### Temporal Pagerank on link streams
-
-#### Random walk based version [```temp_pr_linkstr_walk```](./src/pagerank.py)
-On this algorithm, the edges have now also an ending time [[3]](#3), which prevent pagerank memorless point of vue when looking at paths. Two versions are written, the first one reimplements the algorithm for timestamped edges in reverse ensuring that paths taken into account exist. The problem is that it's not really dynamic since everything needs to be recomputed when going from time $t$ to $t+1$. 
-
-**Complexity:** same as temporal pagerank
-
-#### Static version [```temp_pr_linkstr_static```](./src/pagerank.py)
+### Temporal Pagerank on link streams [```temp_pr_linkstr_static```](./src/pagerank.py)
 In this version we apply standard pagerank algorithm on a link stream, weighting the edges in the graph according to their duration:
 
 We also re-use the transition probability introduced in the temporal pagerank algorithm.

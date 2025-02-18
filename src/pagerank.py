@@ -47,7 +47,7 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e
 
 
 
-def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize=False, p_vector=None, t_end=math.inf, alpha=0.85, beta=1):
+def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize=True, p_vector=None, t_end=math.inf, alpha=0.85, beta=1):
     """
     Temporal PageRank on timestamped edges.
 
@@ -69,7 +69,8 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
         h = np.zeros(n)
         for (u, _, _) in t_edges:
             h[u] += 1
-        if p_vector:
+        h = h / len(t_edges)
+        if isinstance(p_vector, np.ndarray):
             h = p_vector / (h / len(t_edges))
     for (u, v, t) in t_edges:
         if t > t_end:
