@@ -2,7 +2,10 @@ import numpy as np
 import networkx as nx
 import math
 
-def create_transition_and_dangling_matrices(graph: nx.DiGraph):
+
+def create_transition_and_dangling_matrices(
+    graph: nx.DiGraph,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Computes the transition probability matrix and the dangling node vector
     from a directed weighted (on the edges) graph from networkx.
@@ -16,13 +19,21 @@ def create_transition_and_dangling_matrices(graph: nx.DiGraph):
             a[u] = 1
         total_weight = sum([edge_weights[(u, v)] for v in graph.successors(u)])
         for v in graph.successors(u):
-            h[u-1, v-1] = edge_weights[(u, v)] / total_weight
+            h[u - 1, v - 1] = edge_weights[(u, v)] / total_weight
     return h, a
 
-def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e-5):
+
+def static_pr_pwr(
+    h_matrix: np.ndarray,
+    a_vector: np.ndarray,
+    alpha: float = 0.85,
+    p_vector: np.ndarray | None = None,
+    iter: int = 50,
+    eps: float = 1e-5,
+) -> np.ndarray:
     """
     Static PageRank implemented with the original power method.
-    
+
     @parameters:
         h_matrix: hyperlink matrix (Markov matrix from original graph)
         a_vector: dangling node vector
@@ -30,13 +41,13 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e
         p_vector: personalization vector, if none then 1/n vector is taken
         iter:     number of iterations of the power method
         eps:      minimal convergence gap
-    
+
     @returns:
         r: pagerank vector
     """
     n = len(h_matrix)
     if not isinstance(p_vector, np.ndarray):
-        p_vector = np.ones((1, n)) * 1/n
+        p_vector = np.ones((1, n)) * 1 / n
     r = p_vector
     for _ in range(iter):
         rr = alpha * r @ h_matrix + (alpha * r @ a_vector + 1 - alpha) * p_vector
@@ -46,8 +57,15 @@ def static_pr_pwr(h_matrix, a_vector, alpha=0.85, p_vector=None, iter=50, eps=1e
     return rr
 
 
-
-def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize=True, p_vector=None, t_end=math.inf, alpha=0.85, beta=1):
+def temp_pr_tstamp_rdwalk(
+    n: int,
+    t_edges: list[tuple[int, int, int]],
+    personalize: bool = True,
+    p_vector: np.ndarray | None = None,
+    t_end: float = math.inf,
+    alpha: float = 0.85,
+    beta: float = 1.0,
+) -> np.ndarray:
     """
     Temporal PageRank on timestamped edges.
 
@@ -59,7 +77,7 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
         t_end:       time limit (if None, every edge will be taken)
         alpha:       probability of folowwing the walk
         beta:        transition probability
-    
+
     @returns:
         r: pagerank vector
     """
@@ -67,12 +85,12 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
     r, s = np.zeros(n), np.zeros(n)
     if personalize:
         h = np.zeros(n)
-        for (u, _, _) in t_edges:
+        for u, _, _ in t_edges:
             h[u] += 1
         h = h / len(t_edges)
         if isinstance(p_vector, np.ndarray):
             h = p_vector / (h / len(t_edges))
-    for (u, v, t) in t_edges:
+    for u, v, t in t_edges:
         if t > t_end:
             return r
         r[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
@@ -86,10 +104,19 @@ def temp_pr_tstamp_rdwalk(n: int, t_edges: list[tuple[int,int,int]], personalize
             s[u] = 0
     return r
 
-def temp_pr_linkstr_walk(n, t_edges, t_end, personalize=True, p_vector=None, alpha=0.85, beta=1):
+
+def temp_pr_linkstr_walk(
+    n: int,
+    t_edges: list,
+    t_end: float,
+    personalize: bool = True,
+    p_vector: np.ndarray | None = None,
+    alpha: float = 0.85,
+    beta: float = 1.0,
+) -> np.ndarray:
     """
     Temporal PageRank on link streams. The algorithm is based on the timestamped edges version.
-    
+
     @parameters:
         n:           number of nodes in the graph
         t_edges:     list of temporal edges
@@ -98,7 +125,7 @@ def temp_pr_linkstr_walk(n, t_edges, t_end, personalize=True, p_vector=None, alp
         p_vector:    personalization vector, if None given then out-degree vector is used (personalize needs to be True)
         alpha:       probability of folowwing the walk
         beta:        transition probability
-    
+
     @returns:
         r: pagerank vector
     """
@@ -107,12 +134,12 @@ def temp_pr_linkstr_walk(n, t_edges, t_end, personalize=True, p_vector=None, alp
     r, s = np.zeros(n), np.zeros(n)
     if personalize:
         h = np.zeros(n)
-        for (u, _, _) in t_edges:
+        for u, _, _ in t_edges:
             h[u] += 1
         h = h / len(t_edges)
         if isinstance(p_vector, np.ndarray):
             h = p_vector / (h / len(t_edges))
-    for (u, v, _, _) in valid_t_edges:
+    for u, v, _, _ in valid_t_edges:
         r[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
         s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
         r[v] += s[u] * alpha
@@ -124,10 +151,18 @@ def temp_pr_linkstr_walk(n, t_edges, t_end, personalize=True, p_vector=None, alp
             s[u] = 0
     return r
 
-def temp_pr_linkstr(t_edges, t_end=math.inf, alpha=0.85, p_vector=None, iter=50, eps=1e-5):
+
+def temp_pr_linkstr(
+    t_edges: list,
+    t_end: float = math.inf,
+    alpha: float = 0.85,
+    p_vector: np.ndarray | None = None,
+    iter: int = 50,
+    eps: float = 1e-5,
+) -> np.ndarray:
     """
     Temporal PageRank like measure. It works like the original pagerank but adds temporal informations.
-    
+
     @parameters:
         t_edges:     list of temporal edges
         t_end:       time limit (if None, every edge is used)
@@ -135,13 +170,17 @@ def temp_pr_linkstr(t_edges, t_end=math.inf, alpha=0.85, p_vector=None, iter=50,
         p_vector:    personalization vector, if none then 1/n vector is taken
         iter:        number of iterations of the power method
         eps:         minimal convergence gap
-    
+
     @returns:
         r: pagerank vector
     """
     valid_t_edges = filter(t_edges, lambda e: e[3] >= t_end)
-    time_length = min(max(valid_t_edges, key=lambda x: x[1]), t_end) - min(valid_t_edges, key=lambda x: x[0])
-    digraph_edges = [(e[0], e[1], {"weight": (e[1]-e[0])/time_length}) for e in valid_t_edges]
+    time_length = min(max(valid_t_edges, key=lambda x: x[1]), t_end) - min(
+        valid_t_edges, key=lambda x: x[0]
+    )
+    digraph_edges = [
+        (e[0], e[1], {"weight": (e[1] - e[0]) / time_length}) for e in valid_t_edges
+    ]
     G = nx.DiGraph()
     G.add_edges_from(digraph_edges)
     h, a = create_transition_and_dangling_matrices(G)

@@ -3,9 +3,12 @@ import numpy as np
 import pagerank as pr
 import utils
 
+
 def main():
-    print(" Static PageRank")
-    graph1_nx = nx.DiGraph([(1, 2),(3, 5),(5, 6),(1, 3),(4, 5),(6, 4),(3, 1),(4, 6),(3, 2),(5, 4)])
+    print("static PageRank")
+    graph1_nx = nx.DiGraph(
+        [(1, 2), (3, 5), (5, 6), (1, 3), (4, 5), (6, 4), (3, 1), (4, 6), (3, 2), (5, 4)]
+    )
     h, a = pr.create_transition_and_dangling_matrices(graph1_nx)
     # p = np.array([[2/10, 0, 3/10, 2/10, 2/10, 1/10]])
     r = pr.static_pr_pwr(h, a)
@@ -37,5 +40,6 @@ def main():
     # for t in range(1, 13):
     #     r = pr.temp_pr_tstamp_rdwalk(n, t_edges_2, t_end=t, personalize=True)
     #     print("pagerank ranking: ", utils.pagerank_ranking(r))
+
 
 main()
