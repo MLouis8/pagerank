@@ -90,6 +90,7 @@ def temp_pr_tstamp_rdwalk(
         h = h / len(t_edges)
         if isinstance(p_vector, np.ndarray):
             h = p_vector / (h / len(t_edges))
+    print(h)
     for u, v, t in t_edges:
         if t > t_end:
             return r

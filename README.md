@@ -33,6 +33,8 @@ Knowing that:
 
 ### Pagerank like measure on stream graphs [```temp_pr_str_graphs```](./src/pagerank.py)
 
+## Experiment
+
 ## Programing Language
 
 The code is written in Python. The choice of a high-level programing language is essentialy for simplicity, readability and the too few algorithmic tricks to implement.
