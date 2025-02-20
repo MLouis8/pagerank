@@ -57,9 +57,9 @@ def extend_tedgelist(t_edges: list, n: int) -> list:
     min_t = min(t_edges, key=lambda x: x[2])
     max_t = max(t_edges, key=lambda x: x[2])
     edges = [(e[0], e[1]) for e in t_edges]
-    new_edges = rd.choices(edges, k=n - len(t_edges))
-    new_tedges = [(e[0], e[1], rd.randint(min_t, max_t)) for e in new_edges]
-    return t_edges + new_tedges
+    new_edges = rd.choices(edges, k=n)
+    new_tedges = [(e[0], e[1], i) for i, e in enumerate(new_edges)]
+    return new_tedges
 
 def patg_to_lstream(fname: str, new_fname: str):
     t_edges = patg_to_tedges(fname)
