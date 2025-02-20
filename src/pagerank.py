@@ -65,7 +65,8 @@ def temp_pr_tstamp_rdwalk(
     t_end: float = math.inf,
     alpha: float = 0.85,
     beta: float = 1.0,
-) -> np.ndarray:
+    save_steps: bool = False
+) -> np.ndarray | list[np.ndarray]:
     """
     Temporal PageRank on timestamped edges.
 
@@ -77,12 +78,15 @@ def temp_pr_tstamp_rdwalk(
         t_end:       time limit (if None, every edge will be taken)
         alpha:       probability of folowwing the walk
         beta:        transition probability
-
+        save_steps:  if True then each vector corresponding to an edge addition is saved and returned
     @returns:
         r: pagerank vector
     """
     t_edges.sort(key=lambda t: t[2])
     r, s = np.zeros(n), np.zeros(n)
+    if save_steps:
+        r_list = []
+        prev_r = np.zeros(n)
     if personalize:
         h = np.zeros(n)
         for u, _, _ in t_edges:
@@ -92,18 +96,25 @@ def temp_pr_tstamp_rdwalk(
             h = p_vector / (h / len(t_edges))
     for u, v, t in t_edges:
         if t > t_end:
-            print("returned ", r, "at time ", t)
-            return r
-        r[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
-        s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
-        r[v] += s[u] * alpha
+            return r_list if save_steps else r
+        if save_steps:
+            r_list.append(prev_r)
+            r_list[-1][u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+            s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+            r_list[-1][v] += s[u] * alpha
+        else:
+            r[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+            s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+            r[v] += s[u] * alpha
         if beta < 1:
             s[v] += s[u] * (1 - beta) * alpha
             s[u] *= beta
         else:
             s[v] += s[u] * alpha
             s[u] = 0
-    return r
+        if save_steps:
+            prev_r = r_list[-1].copy()
+    return r_list if save_steps else r
 
 
 def temp_pr_linkstr_walk(

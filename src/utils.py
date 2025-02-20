@@ -39,18 +39,22 @@ def pagerank_ranking(r: np.ndarray) -> list:
     return sorted(range(len(r)), key=lambda k: r[k], reverse=True)
 
 
-def digraph_from_edges(t_edges: list) -> nx.digraph:
-    G = nx.Digraph()
-    if len(t_edges[0]) == 3:
-        digraph_edges = [(e[0], e[1], {"weight": e[2]}) for e in t_edges]
-    elif len(t_edges[0]) == 4:
-        time_length = max(t_edges, key=lambda x: x[1]) - min(
-            t_edges, key=lambda x: x[0]
-        )
-        digraph_edges = [
-            (e[0], e[1], {"weight": (e[1] - e[0]) / time_length}) for e in t_edges
-        ]
-    G.add_edges_from([digraph_edges])
+def digraph_from_edges(t_edges: list, time_weight: bool) -> nx.digraph:
+    G = nx.DiGraph()
+    if time_weight:
+        if len(t_edges[0]) == 3:
+            digraph_edges = [(e[0], e[1], {"weight": e[2]}) for e in t_edges]
+        elif len(t_edges[0]) == 4:
+            time_length = max(t_edges, key=lambda x: x[1]) - min(
+                t_edges, key=lambda x: x[0]
+            )
+            digraph_edges = [
+                (e[0], e[1], {"weight": (e[1] - e[0]) / time_length}) for e in t_edges
+            ]
+    else:
+        digraph_edges = [(e[0], e[1]) for e in t_edges]
+        digraph_edges = list(set(digraph_edges)) 
+    G.add_edges_from(digraph_edges)
     return G
 
 def extend_tedgelist(t_edges: list, n: int) -> list:
