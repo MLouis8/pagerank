@@ -3,17 +3,17 @@ from utils import pagerank_ranking
 import numpy as np
 from scipy.stats import pearsonr
 
-def convergence_plot(fname: str, static_pr: np.ndarray, temp_pr: list):
+def convergence_plot(fname: str, static_pr: np.ndarray, temp_pr: list, delta=1):
     static_rank = pagerank_ranking(static_pr)
     ax = plt.subplot()
     k = len(temp_pr)
-    x_temp, y_temp = np.arange(k), np.zeros(k)
-    for j in range(k):
-        y_temp[j] = pearsonr(static_rank, pagerank_ranking(temp_pr[j])).statistic
+    x_temp, y_temp = np.arange(0, k, delta), np.zeros(k//delta)
+    for j in range(0, k, delta):
+        y_temp[j//delta] = pearsonr(temp_pr[j], static_pr).statistic
     ax.plot(x_temp, y_temp, label="temporal pagerank")
-    ax.set_xlabel("nb of edges (time)")
+    ax.set_xlabel("nb of temporal edges")
     ax.set_ylabel("correlation coeff")
-    ax.set_ylim(-1., 1.)
+    ax.set_ylim(0., 1.1)
     ax.legend()
     ax.set_title("Convergence of temporal pagerank to static pagerank")
     plt.savefig(fname)

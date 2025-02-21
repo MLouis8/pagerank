@@ -19,7 +19,7 @@ def create_transition_and_dangling_matrices(
             a[u] = 1
         total_weight = sum([edge_weights[(u, v)] for v in graph.successors(u)])
         for v in graph.successors(u):
-            h[u - 1, v - 1] = edge_weights[(u, v)] / total_weight
+            h[u, v] = edge_weights[(u, v)] / total_weight
     return h, a
 
 
@@ -99,12 +99,12 @@ def temp_pr_tstamp_rdwalk(
             return r_list if save_steps else r
         if save_steps:
             r_list.append(prev_r)
-            r_list[-1][u] += (1 - alpha) * h[u] if personalize else 1 - alpha
-            s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+            r_list[-1][u] = r_list[-1][u] * 0.999 + (1 - alpha) * h[u] if personalize else 1 - alpha
+            s[u] = s[u] * 0.999 + (1 - alpha) * h[u] if personalize else 1 - alpha
             r_list[-1][v] += s[u] * alpha
         else:
-            r[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
-            s[u] += (1 - alpha) * h[u] if personalize else 1 - alpha
+            r[u] = r[u] * 0.999 + (1 - alpha) * h[u] if personalize else 1 - alpha
+            s[u] = s[u] * 0.999 + (1 - alpha) * h[u] if personalize else 1 - alpha
             r[v] += s[u] * alpha
         if beta < 1:
             s[v] += s[u] * (1 - beta) * alpha

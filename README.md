@@ -1,6 +1,6 @@
 # Temporal PageRank
 
-The objective of this project is to explore the pagerank algorithm and its temporal versions. First the **original algorithm** is implemented, then 3 others follow. The second one is the **temporal pagerank** [[2]](#2) applied on edges with only one time parameter. It takes temporal edges one by one, allowing the user to have the temporal pagerank vector a each time step, in this sense it really gives us a temporal pagerank. Then I worked on **linkstreams** and **stream graphs** [[3]](#3) where edges also have an expiry time. It makes it impossible to simply update existing walks when adding an edge as before, since as time goes by, edges can be removed and paths destroyed. Hence I implemented two solutions, the first is a direct adaptation of temporal pagerank, where only existing edges at a specific time are considered. But in this way we lose the dynamic essence of the algorithm (if an edge needs to be added, everything must be computed again). The second solution is a pagerank like measure, that works on stream graphs (where nodes also have a temporal component) merging the original algorithm with concepts of stream graphs (*duration* and *contribution* of links and nodes).
+The objective of this project is to explore the pagerank algorithm and its temporal versions. First the **original algorithm** is implemented, then 3 others follow. The second one is the **temporal pagerank** [[2]](#2) applied on edges with only one time parameter. It takes temporal edges one by one, allowing the user to have the temporal pagerank vector a each time step, in this sense it really gives us a temporal pagerank. Then the focus was put on **linkstreams** and **stream graphs** [[3]](#3) where edges also have an expiry time. It makes it impossible to simply update existing walks when adding an edge as before, since as time goes by, edges can be removed and paths destroyed. Hence we implemented two solutions, the first is a direct adaptation of temporal pagerank, where only existing edges at a specific time are considered. But in this way we lose the dynamic essence of the algorithm (if an edge needs to be added, everything must be computed again). The second solution is a pagerank like measure, that works on stream graphs (where nodes also have a temporal component) merging the original algorithm with concepts of stream graphs (*duration* and *contribution* of links and nodes).
 
 ## Content
 
@@ -33,7 +33,17 @@ Knowing that:
 
 ### Pagerank like measure on stream graphs [```temp_pr_str_graphs```](./src/pagerank.py)
 
-## Experiment
+## Experimentations
+
+### Convergence
+We first want to verify the convergence properties of the different temporal pagerank towards static orginal pagerank under specific conditions.
+For this we use the personalization vector 
+Let $T$ a time 
+
+### Pagerank analysis
+Let's now run the above algorithms on big temporal data, for this purpose we use the dataset [```1_15_SMS```](./data/1_15_SMS.patg).
+
+
 
 ## Programing Language
 

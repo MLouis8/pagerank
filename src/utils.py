@@ -60,8 +60,9 @@ def digraph_from_edges(t_edges: list, time_weight: bool) -> nx.digraph:
 def extend_tedgelist(t_edges: list, n: int) -> list:
     min_t = min(t_edges, key=lambda x: x[2])
     max_t = max(t_edges, key=lambda x: x[2])
-    edges = [(e[0], e[1]) for e in t_edges]
-    new_edges = rd.choices(edges, k=n)
+    edges = list(set([(e[0], e[1]) for e in t_edges]))
+    w = [1/len(edges) for edge in edges]
+    new_edges = rd.choices(edges, k=n, weights=w)
     new_tedges = [(e[0], e[1], i) for i, e in enumerate(new_edges)]
     return new_tedges
 
