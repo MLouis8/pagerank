@@ -142,11 +142,11 @@ def temp_pr_linkstr_walk(
         r: pagerank vector
     """
     t_edges.sort(key=lambda t: t[2])
-    valid_t_edges = filter(lambda e: e[3] >= t_end)
+    valid_t_edges = filter(lambda e: e[3] < t_end, t_edges)
     r, s = np.zeros(n), np.zeros(n)
     if personalize:
         h = np.zeros(n)
-        for u, _, _ in t_edges:
+        for u, _, _, _ in t_edges:
             h[u] += 1
         h = h / len(t_edges)
         if isinstance(p_vector, np.ndarray):
@@ -165,6 +165,7 @@ def temp_pr_linkstr_walk(
 
 
 def temp_pr_linkstr(
+    n: int,
     t_edges: list,
     t_end: float = math.inf,
     alpha: float = 0.85,
@@ -176,6 +177,7 @@ def temp_pr_linkstr(
     Temporal PageRank like measure. It works like the original pagerank but adds temporal informations.
 
     @parameters:
+        n:           number of nodes
         t_edges:     list of temporal edges
         t_end:       time limit (if None, every edge is used)
         alpha:       probability of using h_matrix  / convergence ratio
@@ -186,7 +188,13 @@ def temp_pr_linkstr(
     @returns:
         r: pagerank vector
     """
-    valid_t_edges = filter(t_edges, lambda e: e[3] >= t_end)
+    valid_t_edges, flag = [], True
+    for edge in t_edges:
+        if edge[3] < t_end:
+            valid_t_edges.append(edge)
+            falg = False
+    if flag:
+        return np.zeros(n)
     time_length = min(max(valid_t_edges, key=lambda x: x[1]), t_end) - min(
         valid_t_edges, key=lambda x: x[0]
     )

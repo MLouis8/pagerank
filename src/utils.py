@@ -67,7 +67,7 @@ def extend_tedgelist(t_edges: list, n: int) -> list:
     return new_tedges
 
 def patg_to_lstream(fname: str, new_fname: str):
-    t_edges = patg_to_tedges(fname)
+    _, t_edges = patg_to_tedges(fname)
     max_t = max(t_edges, key=lambda x: x[2])[2]
     st_edges = [str(e[0]) + ' ' + str(e[1]) + ' ' + str(e[2]) + ' ' + str(rd.randint(e[2], max_t+1000)) + '\n' for e in t_edges]
     print(len(st_edges))

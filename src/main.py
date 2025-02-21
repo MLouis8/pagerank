@@ -20,18 +20,23 @@ def convergence_experiment():
     print("pageranks computed...")
     plot.convergence_plot("convergence.jpg", static_pr, temp_pr, 100)
 
+
 def pr_comparison():
-    n, t_edges = utils.patg_to_tedges("data/graph1.patg")
+    n, t_edges = utils.patg_to_tedges("data/1_01_hypertext.patg")
+    _, t_edges_2 = utils.lstream_to_tedges("data/1_01_hypertext.lstream")
     G = utils.digraph_from_edges(t_edges, False)
     print("graphs loaded...")
     h, a = pr.create_transition_and_dangling_matrices(G)
     static_pr = pr.static_pr_pwr(h, a)[0]
     print("static pr computed...")
     temp_pr = pr.temp_pr_tstamp_rdwalk(n, t_edges, save_steps=True)
-    max_time = max(t_edges)
-    for t in range(max_time):
-        links_pr1 = pr.temp_pr_linkstr_walk(n, t_edges, t_end=t)
-        links_pr2 = pr.temp_pr_linkstr()
+    t_edges_2.sort(key=lambda t: t[2])
+    links_pr1, links_pr2 = [], []
+    for t in range(1, len(t_edges_2)+1):
+        links_pr1.append(pr.temp_pr_linkstr_walk(n, t_edges_2[:t], t_end=t))
+        links_pr2.append(pr.temp_pr_linkstr(n, t_edges_2[:t]))
+    plot.pagerank_evolution_plot(n, "pr_comparisons.jpg", static_pr, [temp_pr, links_pr1, links_pr2], ["temporal pagerank", "linkstream adaptation", "linkstream measure"])
+
 
 def compare_original_pr():
     n, t_edges = utils.patg_to_tedges("data/graph1.patg")
@@ -44,6 +49,7 @@ def compare_original_pr():
     pagerank = nx.pagerank(G, alpha=0.85, personalization=p_dict, weight='weight')
     pr_vector = [pagerank[i] for i in range(len(static_pr))]
     print(pearsonr(static_pr, pr_vector).statistic)
+
 
 def main():
     pr_comparison()
