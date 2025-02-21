@@ -47,15 +47,18 @@ We first want to verify the convergence properties of the temporal pagerank towa
 For this we use the personalization vector where nodes are weighted according to the number of out edges they have in proportion to the total numer of edges.
 Convergence appear when edges are drawn randomly and the bigger the size of the sample, the closer it comes to static pagerank.
 
-![alt text](https://github.com/MLouis8/pagerank/blob/tree/main/plots/convergence.jpg)
+![convergence](plots/convergence.jpg)
 
-Here we used the temporal graph ```hyper_text```[[4]](#4) that has $113$ nodes and $41636$ temporal edges and Pearson correlation coefficient to compare at each edge addition static pagerank and temporal pagerank
+Here we used the temporal graph ```hyper_text```[[4]](#4) that has $113$ nodes and $41636$ temporal edges and Pearson correlation coefficient to compare at each edge addition static pagerank and temporal pagerank.
+The convergence is observable as the correlation tend to $1$.
 
 ### Pagerank analysis
 
-Let's now run the above algorithms on big temporal data, for this purpose we use the dataset [```1_15_SMS```](./data/1_15_SMS.patg).
+Let's now run the above algorithms on the same dataset. For link streams, end timestamps are drawn as random and starting timestamps are kept. We follow here the ranks of the node with the biggest static pagerank over time.
 
-![alt text](https://github.com/MLouis8/pagerank/blob/tree/main/plots/pr_comparisons.jpg?raw=true)
+![comparison](plots/pr_comparisons.jpg)
+
+Temporal pagerank shows significant evolutions in ranking while other two metrics vary much less. In a sense this result could be expected for the pagerank like measure in link streams (green) since just weights on edges are added (the structure of the graph is the same). But the linkstream adaptation has no particular reason to follow static ranking, with furthermore analysis we could find interesting explanations to this.
 
 ## Programing Language
 
