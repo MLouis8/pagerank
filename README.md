@@ -47,7 +47,7 @@ We first want to verify the convergence properties of the temporal pagerank towa
 For this we use the personalization vector where nodes are weighted according to the number of out edges they have in proportion to the total numer of edges.
 Convergence appear when edges are drawn randomly and the bigger the size of the sample, the closer it comes to static pagerank.
 
-![alt text](https://github.com/MLouis8/pagerank/tree/main/plots/convergence.jpg)
+![alt text](https://github.com/MLouis8/pagerank/blob/tree/main/plots/convergence.jpg)
 
 Here we used the temporal graph ```hyper_text```[[4]](#4) that has $113$ nodes and $41636$ temporal edges and Pearson correlation coefficient to compare at each edge addition static pagerank and temporal pagerank
 
@@ -55,7 +55,7 @@ Here we used the temporal graph ```hyper_text```[[4]](#4) that has $113$ nodes a
 
 Let's now run the above algorithms on big temporal data, for this purpose we use the dataset [```1_15_SMS```](./data/1_15_SMS.patg).
 
-![alt text](https://github.com/MLouis8/pagerank/tree/main/plots/pr_comparisons.jpg)
+![alt text](https://github.com/MLouis8/pagerank/blob/tree/main/plots/pr_comparisons.jpg)
 
 ## Programing Language
 
