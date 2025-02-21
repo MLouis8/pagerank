@@ -55,7 +55,7 @@ Here we used the temporal graph ```hyper_text```[[4]](#4) that has $113$ nodes a
 
 Let's now run the above algorithms on big temporal data, for this purpose we use the dataset [```1_15_SMS```](./data/1_15_SMS.patg).
 
-![alt text](https://github.com/MLouis8/pagerank/blob/tree/main/plots/pr_comparisons.jpg)
+![alt text](https://github.com/MLouis8/pagerank/blob/tree/main/plots/pr_comparisons.jpg?raw=true)
 
 ## Programing Language
 
